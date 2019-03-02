@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Respawn;
+using System;
 using System.Threading.Tasks;
 using Xunit;
+using XunitCollectionTest.Controllers;
 
 namespace Tests
 {
@@ -10,13 +12,16 @@ namespace Tests
         protected BaseCollectionTest(Fixture fixture)
         {
             Fixture = fixture;
+            Checkpoint = new Checkpoint();
+            Checkpoint.Reset(Connection.String).Wait();
         }
 
         public Fixture Fixture { get; }
+        public Checkpoint Checkpoint { get; private set; }
 
         public void Dispose()
         {
-            // This will be called after every test
+            Checkpoint.Reset(Connection.String).Wait();
         }
     }
 
@@ -32,8 +37,11 @@ namespace Tests
         [InlineData(3)]
         public async Task FixtureFromCollection(int value)
         {
+            // Seed
+            var id = Fixture.Seeder.Insert(value.ToString());
+
             // This is executed with a fresh instance of the class for each test
-            var response = await Fixture.Client.GetAsync($"/api/values/{value}");
+            var response = await Fixture.Client.GetAsync($"/api/values/{id}");
             response.EnsureSuccessStatusCode();
         }
     }
@@ -50,8 +58,11 @@ namespace Tests
         [InlineData(3)]
         public async Task FixtureFromCollection(int value)
         {
+            // Seed
+            var id = Fixture.Seeder.Insert(value.ToString());
+
             // This is executed with a fresh instance of the class for each test
-            var response = await Fixture.Client.GetAsync($"/api/values/{value}");
+            var response = await Fixture.Client.GetAsync($"/api/values/{id}");
             response.EnsureSuccessStatusCode();
         }
     }

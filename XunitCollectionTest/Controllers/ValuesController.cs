@@ -1,45 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Dapper;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Data.SqlClient;
 
 namespace XunitCollectionTest.Controllers
 {
+    public static class Connection
+    {
+        public static string String = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Test;Integrated Security=True;Connect Timeout=30;";
+    }
+
     [Route("api/[controller]")]
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class ValuesController : ControllerBase, IDisposable
     {
-        // GET api/values
-        [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
+        private readonly SqlConnection _conn;
+
+        public ValuesController()
         {
-            return new string[] { "value1", "value2" };
+            _conn = new SqlConnection(Connection.String);
         }
 
-        // GET api/values/5
+        public void Dispose()
+        {
+            _conn.Dispose();
+        }
+
         [HttpGet("{id}")]
         public ActionResult<string> Get(int id)
         {
-            return "value";
-        }
-
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            return _conn.QueryFirst<string>(
+                "SELECT Value FROM dbo.Todo WHERE Id = @id"
+                , new { id });
         }
     }
 }

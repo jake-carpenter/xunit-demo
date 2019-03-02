@@ -20,14 +20,18 @@ namespace Tests
         [InlineData(3)]
         public async Task DirectFixture(int value)
         {
+            // Seed
+            var id = _fixture.Seeder.Insert(value.ToString());
+
             // This is executed with a fresh instance of the class for each test
-            var response = await _fixture.Client.GetAsync($"/api/values/{value}");
+            var response = await _fixture.Client.GetAsync($"/api/values/{id}");
             response.EnsureSuccessStatusCode();
         }
 
         public void Dispose()
         {
             // This will be called after every test
+            _fixture.Seeder.ClearData();
         }
     }
 }
